@@ -121,6 +121,31 @@ prepare_insert_stmt(sqlite3 *db,
                             NULL);
 }
 
+/* Executes any "CREATE INDEX" commands defined for the GTFS file */
+inline static int
+create_indices(sqlite3 *db,
+               const gtfs_file_spec_t *gtfs_file_spec,
+               char **errmsg) {
+  int result = SQLITE_OK;
+  const char *index_stmt_str;
+  unsigned int index_stmt_index;
+
+  index_stmt_index = 0;
+  index_stmt_str =
+    gtfs_file_spec->create_index_stmt_strs[index_stmt_index];
+  while(index_stmt_str && result == SQLITE_OK) {
+    result = sqlite3_exec(db,
+                          index_stmt_str,
+                          NULL,
+                          NULL,
+                          errmsg);
+    index_stmt_str =
+      gtfs_file_spec->create_index_stmt_strs[++index_stmt_index];
+  }
+
+  return result;
+}
+
 /* Invoked by the CSV parser each time a field has been parsed */
 static void field_parsed(void *val, size_t len, void *data) {
   static const char *date_format = "%Y%m%d";
@@ -392,6 +417,15 @@ long load_gtfs_file(const gtfs_file_spec_t *gtfs_file_spec,
                   "load_gtfs_file: "
                   "Error finalizing INSERT statement: %s\n",
                   sqlite3_errmsg(db));
+        }
+
+        /* Define indices on the table, if any CREATE INDEX commands
+           have been given */
+        if(create_indices(db, gtfs_file_spec, &errmsg) != SQLITE_OK) {
+          fprintf(stderr,
+                  "load_gtfs_file: "
+                  "Error creating index on table: %s\n",
+                  errmsg);
         }
 
         /* Return the number of objects loaded to our caller */
