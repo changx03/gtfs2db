@@ -47,7 +47,7 @@ const gtfs_file_spec_t stop_times_file_spec = {
   "INSERT INTO stop_times(trip_id, arrival_time, departure_time, "
     "stop_id, stop_sequence, stop_headsign, pickup_type, "
     "drop_off_type, shape_dist_traveled) "
-    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
