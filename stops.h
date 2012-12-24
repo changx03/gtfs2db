@@ -37,27 +37,29 @@ const gtfs_file_spec_t stops_file_spec = {
 
   /* Create the corresponding table in the database */
   "CREATE TABLE stops("
-    "stop_id VARCHAR(255) PRIMARY KEY, "
-    "stop_code VARCHAR(16), "
-    "stop_name VARCHAR(255) NOT NULL, "
-    "stop_desc VARCHAR(255), "
-    "stop_lat DECIMAL(8,6) NOT NULL, "
-    "stop_lon DECIMAL(9,6) NOT NULL, "
+    "id VARCHAR(255) PRIMARY KEY, "
+    "code VARCHAR(16), "
+    "name VARCHAR(255) NOT NULL, "
+    "desc VARCHAR(255), "
+    "lat DECIMAL(8,6) NOT NULL, "
+    "lon DECIMAL(9,6) NOT NULL, "
     "zone_id VARCHAR(16), "
-    "stop_url VARCHAR(255), "
+    "url VARCHAR(255), "
     "location_type TINYINT, "
-    "parent_station VARCHAR(255) REFERENCES stops(stop_id), "
-    "stop_timezone VARCHAR(64), "
+    "parent_station VARCHAR(255) REFERENCES stops(id), "
+    "timezone VARCHAR(64), "
     "wheelchair_boarding TINYINT);",
 
   /* Insert a new record into the database */
-  "INSERT INTO stops(stop_id, stop_code, stop_name, stop_desc, "
-    "stop_lat, stop_lon, zone_id, stop_url, location_type, "
-    "parent_station, stop_timezone, wheelchair_boarding) "
+  "INSERT INTO stops(id, code, name, desc, lat, lon, zone_id, url, "
+    "location_type, parent_station, timezone, wheelchair_boarding) "
     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
+    /* Allow fast lookups by stop-code */
+    "CREATE UNIQUE INDEX stops_code_id_index "
+      "ON stops(code, id)",
     NULL
   },
 };

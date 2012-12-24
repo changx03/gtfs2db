@@ -33,19 +33,19 @@ const gtfs_file_spec_t trips_file_spec = {
 
   /* Create the corresponding table in the database */
   "CREATE TABLE trips("
-    "trip_id VARCHAR(255) PRIMARY KEY, "
-    "route_id VARCHAR(255) NOT NULL REFERENCES routes(route_id), "
+    "id VARCHAR(255) PRIMARY KEY, "
+    "route_id VARCHAR(255) NOT NULL REFERENCES routes(id), "
     "service_id VARCHAR(255) NOT NULL, "
-    "trip_headsign VARCHAR(255), "
-    "trip_short_name VARCHAR(255), "
+    "headsign VARCHAR(255), "
+    "short_name VARCHAR(255), "
     "direction_id TINYINT, "
     "block_id VARCHAR(255), "
     "shape_id VARCHAR(255), "
     "wheelchair_accessible TINYINT);",
 
   /* Insert a new record into the database */
-  "INSERT INTO trips(trip_id, route_id, service_id, trip_headsign, "
-    "trip_short_name, direction_id, block_id, shape_id, "
+  "INSERT INTO trips(id, route_id, service_id, headsign, "
+    "short_name, direction_id, block_id, shape_id, "
     "wheelchair_accessible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */

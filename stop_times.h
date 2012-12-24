@@ -33,7 +33,7 @@ const gtfs_file_spec_t stop_times_file_spec = {
 
   /* Create the corresponding table in the database */
   "CREATE TABLE stop_times("
-    "trip_id VARCHAR(255) NOT NULL REFERENCES trips(trip_id), "
+    "trip_id VARCHAR(255) NOT NULL REFERENCES trips(id), "
     "arrival_time INTEGER, "
     "departure_time INTEGER, "
     "stop_id VARCHAR(255) NOT NULL, "

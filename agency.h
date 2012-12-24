@@ -31,18 +31,17 @@ const gtfs_file_spec_t agency_file_spec = {
 
   /* Create the corresponding table in the database */
   "CREATE TABLE agencies("
-    "agency_id VARCHAR(255), "
-    "agency_name VARCHAR(255) NOT NULL, "
-    "agency_url VARCHAR(255) NOT NULL, "
-    "agency_timezone VARCHAR(64) NOT NULL, "
-    "agency_lang CHAR(2), "
-    "agency_phone VARCHAR(32), "
-    "agency_fare_url VARCHAR(255));",
+    "id VARCHAR(255), "
+    "name VARCHAR(255) NOT NULL, "
+    "url VARCHAR(255) NOT NULL, "
+    "timezone VARCHAR(64) NOT NULL, "
+    "lang CHAR(2), "
+    "phone VARCHAR(32), "
+    "fare_url VARCHAR(255));",
 
   /* Insert a new record into the database */
-  "INSERT INTO agencies(agency_id, agency_name, agency_url, "
-    "agency_timezone, agency_lang, agency_phone, agency_fare_url) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?);",
+  "INSERT INTO agencies(id, name, url, timezone, lang, phone, "
+    "fare_url) VALUES (?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
