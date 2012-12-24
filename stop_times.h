@@ -36,7 +36,7 @@ const gtfs_file_spec_t stop_times_file_spec = {
     "trip_id VARCHAR(255) NOT NULL REFERENCES trips(id), "
     "arrival_time INTEGER, "
     "departure_time INTEGER, "
-    "stop_id VARCHAR(255) NOT NULL, "
+    "stop_id VARCHAR(255) NOT NULL REFERENCES stops(id), "
     "stop_sequence INTEGER NOT NULL, "
     "stop_headsign VARCHAR(255), "
     "pickup_type TINYINT, "
