@@ -51,6 +51,9 @@ const gtfs_file_spec_t stop_times_file_spec = {
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
+    /* Allow fast look-ups by stop ID */
+    "CREATE INDEX stop_times_stop_id_index "
+      "ON stop_times(stop_id);",
     NULL
   },
 };
