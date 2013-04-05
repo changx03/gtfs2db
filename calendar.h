@@ -33,7 +33,7 @@ const gtfs_file_spec_t calendar_file_spec = {
   /* SQL statements */
 
   /* Create the corresponding table in the database */
-  "CREATE TABLE service_schedules("
+  "CREATE TABLE calendars("
     "service_id VARCHAR(255) PRIMARY KEY, "
     "monday BOOLEAN NOT NULL, "
     "tuesday BOOLEAN NOT NULL, "
@@ -46,9 +46,9 @@ const gtfs_file_spec_t calendar_file_spec = {
     "end_date DATE NOT NULL);",
 
   /* Insert a new record into the database */
-  "INSERT INTO service_schedules(service_id, monday, tuesday, "
-    "wednesday, thursday, friday, saturday, sunday, start_date, "
-    "end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+  "INSERT INTO calendars(service_id, monday, tuesday, wednesday, "
+    "thursday, friday, saturday, sunday, start_date, end_date) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
