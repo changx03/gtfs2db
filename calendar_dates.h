@@ -26,14 +26,14 @@ const gtfs_file_spec_t calendar_dates_file_spec = {
   /* SQL statements */
 
   /* Create the corresponding table in the database */
-  "CREATE TABLE service_exceptions("
+  "CREATE TABLE calendar_dates("
     "service_id VARCHAR(255), "
     "date DATE, "
     "exception_type TINYINT NOT NULL, "
     "PRIMARY KEY (service_id, date));",
 
   /* Insert a new record into the database */
-  "INSERT INTO service_exceptions(service_id, date, exception_type) "
+  "INSERT INTO calendar_dates(service_id, date, exception_type) "
     "VALUES (?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
