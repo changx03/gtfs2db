@@ -18,15 +18,15 @@ const gtfs_file_spec_t routes_file_spec = {
   /* Field definitions */
   9,
   (gtfs_field_spec_t *[9]) {
-    &(gtfs_field_spec_t) {"route_id",         TYPE_STRING,   255 },
-    &(gtfs_field_spec_t) {"agency_id",        TYPE_STRING,   255 },
-    &(gtfs_field_spec_t) {"route_short_name", TYPE_STRING,   255 },
-    &(gtfs_field_spec_t) {"route_long_name",  TYPE_STRING,   255 },
-    &(gtfs_field_spec_t) {"route_desc",       TYPE_STRING,  1024 },
-    &(gtfs_field_spec_t) {"route_type",       TYPE_INTEGER,    0 },
-    &(gtfs_field_spec_t) {"route_url",        TYPE_STRING,   255 },
-    &(gtfs_field_spec_t) {"route_color",      TYPE_STRING,     6 },
-    &(gtfs_field_spec_t) {"route_text_color", TYPE_STRING,     6 }
+    &(gtfs_field_spec_t) {"route_id",         TYPE_STRING,   255, true },
+    &(gtfs_field_spec_t) {"agency_id",        TYPE_STRING,   255, false },
+    &(gtfs_field_spec_t) {"route_short_name", TYPE_STRING,   255, true },
+    &(gtfs_field_spec_t) {"route_long_name",  TYPE_STRING,   255, true },
+    &(gtfs_field_spec_t) {"route_desc",       TYPE_STRING,  1024, false },
+    &(gtfs_field_spec_t) {"route_type",       TYPE_INTEGER,    0, true },
+    &(gtfs_field_spec_t) {"route_url",        TYPE_STRING,   255, false },
+    &(gtfs_field_spec_t) {"route_color",      TYPE_STRING,     6, false },
+    &(gtfs_field_spec_t) {"route_text_color", TYPE_STRING,     6, false }
   },
 
   /* SQL statements */

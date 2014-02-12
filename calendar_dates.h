@@ -18,9 +18,9 @@ const gtfs_file_spec_t calendar_dates_file_spec = {
   /* Field definitions */
   3,
   (gtfs_field_spec_t *[3]) {
-    &(gtfs_field_spec_t) {"service_id",     TYPE_STRING, 255 },
-    &(gtfs_field_spec_t) {"date",           TYPE_DATE,     0 },
-    &(gtfs_field_spec_t) {"exception_type", TYPE_INTEGER,  0 }
+    &(gtfs_field_spec_t) {"service_id",     TYPE_STRING, 255, true },
+    &(gtfs_field_spec_t) {"date",           TYPE_DATE,     0, true },
+    &(gtfs_field_spec_t) {"exception_type", TYPE_INTEGER,  0, true }
   },
 
   /* SQL statements */

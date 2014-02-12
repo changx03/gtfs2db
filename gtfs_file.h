@@ -35,6 +35,7 @@ typedef struct {
   const char *name;
   gtfs_field_type_t type;
   unsigned int length;
+  bool required;
 } gtfs_field_spec_t;
 
 /* Specifies a GTFS file (contained within a GTFS bundle) and how it

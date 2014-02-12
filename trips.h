@@ -18,15 +18,15 @@ const gtfs_file_spec_t trips_file_spec = {
   /* Field definitions */
   9,
   (gtfs_field_spec_t *[9]) {
-    &(gtfs_field_spec_t) {"trip_id",               TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"route_id",              TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"service_id",            TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"trip_headsign",         TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"trip_short_name",       TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"direction_id",          TYPE_INTEGER,   0 },
-    &(gtfs_field_spec_t) {"block_id",              TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"shape_id",              TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"wheelchair_accessible", TYPE_INTEGER,   0 }
+    &(gtfs_field_spec_t) {"trip_id",               TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"route_id",              TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"service_id",            TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"trip_headsign",         TYPE_STRING,  255, false },
+    &(gtfs_field_spec_t) {"trip_short_name",       TYPE_STRING,  255, false },
+    &(gtfs_field_spec_t) {"direction_id",          TYPE_INTEGER,   0, false },
+    &(gtfs_field_spec_t) {"block_id",              TYPE_STRING,  255, false },
+    &(gtfs_field_spec_t) {"shape_id",              TYPE_STRING,  255, false },
+    &(gtfs_field_spec_t) {"wheelchair_accessible", TYPE_INTEGER,   0, false }
   },
 
   /* SQL statements */

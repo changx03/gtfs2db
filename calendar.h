@@ -18,16 +18,16 @@ const gtfs_file_spec_t calendar_file_spec = {
   /* Field definitions */
   10,
   (gtfs_field_spec_t *[10]) {
-    &(gtfs_field_spec_t) {"service_id", TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"monday",     TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"tuesday",    TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"wednesday",  TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"thursday",   TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"friday",     TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"saturday",   TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"sunday",     TYPE_BOOLEAN,   0 },
-    &(gtfs_field_spec_t) {"start_date", TYPE_DATE,      0 },
-    &(gtfs_field_spec_t) {"end_date",   TYPE_DATE,      0 }
+    &(gtfs_field_spec_t) {"service_id", TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"monday",     TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"tuesday",    TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"wednesday",  TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"thursday",   TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"friday",     TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"saturday",   TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"sunday",     TYPE_BOOLEAN,   0, true },
+    &(gtfs_field_spec_t) {"start_date", TYPE_DATE,      0, true },
+    &(gtfs_field_spec_t) {"end_date",   TYPE_DATE,      0, true }
   },
 
   /* SQL statements */

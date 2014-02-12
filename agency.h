@@ -18,13 +18,13 @@ const gtfs_file_spec_t agency_file_spec = {
   /* Field definitions */
   7,
   (gtfs_field_spec_t *[7]) {
-    &(gtfs_field_spec_t) {"agency_id",       TYPE_STRING, 255 },
-    &(gtfs_field_spec_t) {"agency_name",     TYPE_STRING, 255 },
-    &(gtfs_field_spec_t) {"agency_url",      TYPE_STRING, 255 },
-    &(gtfs_field_spec_t) {"agency_timezone", TYPE_STRING,  64 },
-    &(gtfs_field_spec_t) {"agency_lang",     TYPE_STRING,   2 },
-    &(gtfs_field_spec_t) {"agency_phone",    TYPE_STRING, 255 },
-    &(gtfs_field_spec_t) {"agency_fare_url", TYPE_STRING, 255 }
+    &(gtfs_field_spec_t) {"agency_id",       TYPE_STRING, 255, false },
+    &(gtfs_field_spec_t) {"agency_name",     TYPE_STRING, 255, true },
+    &(gtfs_field_spec_t) {"agency_url",      TYPE_STRING, 255, true },
+    &(gtfs_field_spec_t) {"agency_timezone", TYPE_STRING,  64, true },
+    &(gtfs_field_spec_t) {"agency_lang",     TYPE_STRING,   2, false },
+    &(gtfs_field_spec_t) {"agency_phone",    TYPE_STRING, 255, false },
+    &(gtfs_field_spec_t) {"agency_fare_url", TYPE_STRING, 255, false }
   },
 
   /* SQL statements */

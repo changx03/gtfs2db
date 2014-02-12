@@ -18,15 +18,15 @@ const gtfs_file_spec_t stop_times_file_spec = {
   /* Field definitions */
   9,
   (gtfs_field_spec_t *[9]) {
-    &(gtfs_field_spec_t) {"trip_id",             TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"arrival_time",        TYPE_TIME,      8 },
-    &(gtfs_field_spec_t) {"departure_time",      TYPE_TIME,      8 },
-    &(gtfs_field_spec_t) {"stop_id",             TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"stop_sequence",       TYPE_INTEGER,   0 },
-    &(gtfs_field_spec_t) {"stop_headsign",       TYPE_STRING,  255 },
-    &(gtfs_field_spec_t) {"pickup_type",         TYPE_INTEGER,   0 },
-    &(gtfs_field_spec_t) {"drop_off_type",       TYPE_INTEGER,   0 },
-    &(gtfs_field_spec_t) {"shape_dist_traveled", TYPE_DOUBLE,    0 }
+    &(gtfs_field_spec_t) {"trip_id",             TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"arrival_time",        TYPE_TIME,      8, true },
+    &(gtfs_field_spec_t) {"departure_time",      TYPE_TIME,      8, true },
+    &(gtfs_field_spec_t) {"stop_id",             TYPE_STRING,  255, true },
+    &(gtfs_field_spec_t) {"stop_sequence",       TYPE_INTEGER,   0, true },
+    &(gtfs_field_spec_t) {"stop_headsign",       TYPE_STRING,  255, false },
+    &(gtfs_field_spec_t) {"pickup_type",         TYPE_INTEGER,   0, false },
+    &(gtfs_field_spec_t) {"drop_off_type",       TYPE_INTEGER,   0, false },
+    &(gtfs_field_spec_t) {"shape_dist_traveled", TYPE_DOUBLE,    0, false }
   },
 
   /* SQL statements */

@@ -190,8 +190,14 @@ static void field_parsed(void *val, size_t len, void *data) {
 
     case TYPE_STRING:
       assert(len <= field_spec->length);
-      if(len == 0) {
-        /* We insert NULL values instead of empty strings */
+      /* For an optional field, we insert a NULL value instead of an
+         empty string to indicate it is not present */
+      /* TODO: Really we should be doing validation of each record
+         (via a custom function defined for each GTFS member file)
+         before we bind any values or attempt to load it. This is a
+         bit of a hack that in the interim allows things like routes
+         with a short name but no long name specified to be loaded. */
+      if(len == 0 && !field_spec->required) {
         sqlite_result = sqlite3_bind_null(parsing_state->insert_stmt,
                                           field_number + 1);
       }
