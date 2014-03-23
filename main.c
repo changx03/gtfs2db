@@ -477,7 +477,8 @@ bool validate_gtfs_bundle(struct zip *gtfs_zip) {
   index = 0;
   while(gtfs_file_spec = gtfs_file_specs[index++]) {
     filename = gtfs_file_spec->filename;
-    if(zip_name_locate(gtfs_zip, filename, 0) == -1) {
+    if(gtfs_file_spec->required &&
+       zip_name_locate(gtfs_zip, filename, 0) == -1) {
       fprintf(stderr,
               "Error: Bundle is missing required file \"%s\".\n",
               filename);
@@ -562,39 +563,47 @@ int main(int argc, char *argv[]) {
           gtfs_file_specs_index = 0;
           while((gtfs_file_spec = gtfs_file_specs[gtfs_file_specs_index++]) &&
                 !parsing_error) {
-            printf("Processing \"%s\": ", gtfs_file_spec->filename);
-            fflush(stdout);
+            /* Process the file if it is either required or optional
+               but present */
+            if(gtfs_file_spec->required ||
+               zip_name_locate(gtfs_zip,
+                               gtfs_file_spec->filename,
+                               0) != -1) {
+              printf("Processing \"%s\": ",
+                     gtfs_file_spec->filename);
+              fflush(stdout);
 
-            parsing_timer = g_timer_new();
-            objects_loaded = load_gtfs_file(gtfs_file_spec,
-                                            gtfs_zip,
-                                            db,
-                                            &csv);
-            g_timer_stop(parsing_timer);
-            parsing_time_elapsed = g_timer_elapsed(parsing_timer,
-                                                   NULL);
+              parsing_timer = g_timer_new();
+              objects_loaded = load_gtfs_file(gtfs_file_spec,
+                                              gtfs_zip,
+                                              db,
+                                              &csv);
+              g_timer_stop(parsing_timer);
+              parsing_time_elapsed = g_timer_elapsed(parsing_timer,
+                                                     NULL);
 
-            /* If parsing was successful, output the number of objects
-               loaded and the time it took */
-            if(objects_loaded > -1) {
-              object_name = objects_loaded == 1?
-                gtfs_file_spec->name.singular:
-                gtfs_file_spec->name.plural;
-              printf("%lu %s added in %.2f seconds",
-                     objects_loaded,
-                     object_name,
-                     parsing_time_elapsed);
-              if(parsing_time_elapsed > 0) {
-                printf(" (%.2fms/%s)",
-                       (parsing_time_elapsed * 1000) / objects_loaded,
-                       gtfs_file_spec->name.singular);
+              /* If parsing was successful, output the number of
+                 objects loaded and the time it took */
+              if(objects_loaded > -1) {
+                object_name = objects_loaded == 1?
+                  gtfs_file_spec->name.singular:
+                  gtfs_file_spec->name.plural;
+                printf("%lu %s added in %.2f seconds",
+                       objects_loaded,
+                       object_name,
+                       parsing_time_elapsed);
+                if(parsing_time_elapsed > 0) {
+                  printf(" (%.2fms/%s)",
+                         (parsing_time_elapsed * 1000) / objects_loaded,
+                         gtfs_file_spec->name.singular);
+                }
               }
-            }
-            else {
-              parsing_error = TRUE;
-            }
+              else {
+                parsing_error = TRUE;
+              }
 
-            puts("");
+              puts("");
+            }
           }
 
           /* Free our CSV parser */

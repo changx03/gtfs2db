@@ -47,6 +47,10 @@ typedef struct {
   /* The name of the file containing these objects */
   const char *filename;
 
+  /* A flag indicating whether the file is required to be present in a
+     GTFS bundle or not */
+  bool required;
+
   /* The number of fields contained in each record (object) and an
      array containing a specifier for each */
   unsigned int num_fields;

@@ -15,6 +15,10 @@ const gtfs_file_spec_t routes_file_spec = {
   /* The filename within the GTFS bundle to load from */
   "routes.txt",
 
+  /* Whether the file is required to be present in a GTFS bundle or
+     not */
+  true,
+
   /* Field definitions */
   9,
   (gtfs_field_spec_t *[9]) {

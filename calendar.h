@@ -15,6 +15,10 @@ const gtfs_file_spec_t calendar_file_spec = {
   /* The filename within the GTFS bundle to load from */
   "calendar.txt",
 
+  /* Whether the file is required to be present in a GTFS bundle or
+     not */
+  true,
+
   /* Field definitions */
   10,
   (gtfs_field_spec_t *[10]) {
