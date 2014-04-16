@@ -42,14 +42,14 @@ const gtfs_file_spec_t routes_file_spec = {
     "short_name VARCHAR(255) NOT NULL, "
     "long_name VARCHAR(255) NOT NULL, "
     "desc TEXT, "
-    "type TINYINT NOT NULL, "
+    "route_type TINYINT NOT NULL, "
     "url VARCHAR(255), "
     "color CHAR(6), "
     "text_color CHAR(6));",
 
   /* Insert a new record into the database */
   "INSERT INTO routes(id, agency_id, short_name, long_name, desc, "
-    "type, url, color, text_color)"
+    "route_type, url, color, text_color)"
     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
