@@ -148,6 +148,8 @@ create_indices(sqlite3 *db,
 
 /* Invoked by the CSV parser each time a field has been parsed */
 static void field_parsed(void *val, size_t len, void *data) {
+  static const char *true_char = "t";
+  static const char *false_char = "f";
   static const char *date_format = "%Y%m%d";
 
   struct tm parsed_date;
@@ -176,6 +178,16 @@ static void field_parsed(void *val, size_t len, void *data) {
     /* Bind this value to our INSERT statement */
     switch(field_spec->type) {
     case TYPE_BOOLEAN:
+      /* Map boolean values to "t" and "f" to match Active Record's
+         behaviour */
+      sqlite_result = sqlite3_bind_text(parsing_state->insert_stmt,
+                                        field_number + 1,
+                                        *((char *)val) == '1' ?
+                                        true_char : false_char,
+                                        1,
+                                        SQLITE_TRANSIENT);
+      break;
+
     case TYPE_INTEGER:
       sqlite_result = sqlite3_bind_int(parsing_state->insert_stmt,
                                        field_number + 1,
