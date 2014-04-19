@@ -20,8 +20,8 @@ const gtfs_file_spec_t trips_file_spec = {
   true,
 
   /* Field definitions */
-  9,
-  (gtfs_field_spec_t *[9]) {
+  10,
+  (gtfs_field_spec_t *[10]) {
     &(gtfs_field_spec_t) {"trip_id",               TYPE_STRING,  255, true },
     &(gtfs_field_spec_t) {"route_id",              TYPE_STRING,  255, true },
     &(gtfs_field_spec_t) {"service_id",            TYPE_STRING,  255, true },
@@ -30,7 +30,8 @@ const gtfs_file_spec_t trips_file_spec = {
     &(gtfs_field_spec_t) {"direction_id",          TYPE_INTEGER,   0, false },
     &(gtfs_field_spec_t) {"block_id",              TYPE_STRING,  255, false },
     &(gtfs_field_spec_t) {"shape_id",              TYPE_STRING,  255, false },
-    &(gtfs_field_spec_t) {"wheelchair_accessible", TYPE_INTEGER,   0, false }
+    &(gtfs_field_spec_t) {"wheelchair_accessible", TYPE_INTEGER,   0, false },
+    &(gtfs_field_spec_t) {"bikes_allowed",         TYPE_INTEGER,   0, false }
   },
 
   /* SQL statements */
@@ -45,12 +46,14 @@ const gtfs_file_spec_t trips_file_spec = {
     "direction_id TINYINT, "
     "block_id VARCHAR(255), "
     "shape_id VARCHAR(255), "
-    "wheelchair_accessible TINYINT);",
+    "wheelchair_accessible TINYINT, "
+    "bikes_allowed TINYINT);",
 
   /* Insert a new record into the database */
   "INSERT INTO trips(id, route_id, service_id, headsign, "
     "short_name, direction_id, block_id, shape_id, "
-    "wheelchair_accessible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+    "wheelchair_accessible, bikes_allowed) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
   /* Define indices on the table for quick lookups */
   (const char *[]) {
