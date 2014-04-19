@@ -5,7 +5,8 @@
 
    Copyright (c) 2012 Simon South. All rights reserved. */
 
-#define _XOPEN_SOURCE  /* include the definition of "strptime" */
+/* Include the definition of "strptime" and "strdup" */
+#define _XOPEN_SOURCE 500
 
 #include <assert.h>
 #include <errno.h>
@@ -50,6 +51,10 @@ typedef struct {
   sqlite3 *db;
   const gtfs_file_spec_t *gtfs_file_spec;
 
+  /* A pool of gtfs_field_value_t objects, used to hold parsed field
+     values */
+  gtfs_field_value_t field_values[MAX_COLUMNS];
+
   /* A mapping between column numbers in the file and field numbers in
      the GTFS-file spec---this accounts for the fact the order of
      fields in each record may vary between GTFS bundles */
@@ -58,6 +63,9 @@ typedef struct {
   /* TRUE if the header (i.e., first) row has already been parsed;
      FALSE otherwise */
   bool header_parsed;
+
+  /* A hash table of fields parsed so far */
+  GHashTable *fields;
 
   /* The number of fields parsed for the current record */
   unsigned int fields_parsed;
@@ -148,102 +156,65 @@ create_indices(sqlite3 *db,
 
 /* Invoked by the CSV parser each time a field has been parsed */
 static void field_parsed(void *val, size_t len, void *data) {
-  static const char *true_char = "t";
-  static const char *false_char = "f";
-  static const char *date_format = "%Y%m%d";
-
-  struct tm parsed_date;
-  char iso8601_date_str[24];
-  unsigned int iso8601_date_str_len;
-  char *hours, *minutes, *seconds;
-
   gtfs_parsing_state_t *parsing_state = (gtfs_parsing_state_t *)data;
   const gtfs_file_spec_t *gtfs_file_spec =
     parsing_state->gtfs_file_spec;
 
-  int field_number;
-  bool field_name_matched;
-  gtfs_field_spec_t *field_spec;
-  int sqlite_result;
-  int max_len;
-
   if(parsing_state->header_parsed) {
     /* We've parsed the header already; this field contains real data */
+
+    unsigned int field_number;
+    gtfs_field_spec_t *field_spec;
+    gtfs_field_value_t *field_value;
 
     field_number =
       parsing_state->field_for_column[parsing_state->fields_parsed];
     field_spec =
       parsing_state->gtfs_file_spec->field_specs[field_number];
 
-    /* Bind this value to our INSERT statement */
+    /* Save this value using our pool of field-value objects */
+    field_value = &parsing_state->field_values[field_number];
+
     switch(field_spec->type) {
     case TYPE_BOOLEAN:
-      /* Map boolean values to "t" and "f" to match Active Record's
-         behaviour */
-      sqlite_result = sqlite3_bind_text(parsing_state->insert_stmt,
-                                        field_number + 1,
-                                        *((char *)val) == '1' ?
-                                        true_char : false_char,
-                                        1,
-                                        SQLITE_TRANSIENT);
+      field_value->boolean_value = (*((char *)val) == '1');
       break;
 
     case TYPE_INTEGER:
-      sqlite_result = sqlite3_bind_int(parsing_state->insert_stmt,
-                                       field_number + 1,
-                                       atoi((const char *)val));
+      field_value->integer_value = atoi((const char *)val);
       break;
 
     case TYPE_DOUBLE:
-      sqlite_result = sqlite3_bind_double(parsing_state->insert_stmt,
-                                          field_number + 1,
-                                          atof((const char *)val));
+      field_value->double_value = atof((const char *)val);
       break;
 
     case TYPE_STRING:
       assert(len <= field_spec->length);
+      assert(*(char *)(val + len) == 0);
+
       /* For an optional field, we insert a NULL value instead of an
          empty string to indicate it is not present */
-      /* TODO: Really we should be doing validation of each record
-         (via a custom function defined for each GTFS member file)
-         before we bind any values or attempt to load it. This is a
-         bit of a hack that in the interim allows things like routes
-         with a short name but no long name specified to be loaded. */
       if(len == 0 && !field_spec->required) {
-        sqlite_result = sqlite3_bind_null(parsing_state->insert_stmt,
-                                          field_number + 1);
+        field_value = NULL;
       }
       else {
-        max_len = len > field_spec->length? field_spec->length: len;
-        sqlite_result = sqlite3_bind_text(parsing_state->insert_stmt,
-                                          field_number + 1,
-                                          val,
-                                          max_len,
-                                          SQLITE_TRANSIENT);
+        field_value->string_value = strdup((char *)val);
       }
       break;
 
     case TYPE_DATE:
-      assert(strptime(val, date_format, &parsed_date));
-      assert(iso8601_date_str_len = strftime(iso8601_date_str,
-                                             sizeof(iso8601_date_str),
-                                             "%F",
-                                             &parsed_date));
-      sqlite_result = sqlite3_bind_text(parsing_state->insert_stmt,
-                                        field_number + 1,
-                                        iso8601_date_str,
-                                        iso8601_date_str_len,
-                                        SQLITE_TRANSIENT);
+      assert(strptime(val, "%Y%m%d", &(field_value->date_value)));
       break;
 
     case TYPE_TIME:
       if(len == 0) {
         /* We insert NULL values for missing arrival or departure
            times in stop times  */
-        sqlite_result = sqlite3_bind_null(parsing_state->insert_stmt,
-                                          field_number + 1);
+        field_value = NULL;
       }
       else {
+        char *hours, *minutes, *seconds;
+
         /* Convert the "H:MM:SS" or "HH:MM:SS" format to a number of
            seconds since midnight */
         /* TODO: This may not correctly handle the shift to or from
@@ -254,34 +225,33 @@ static void field_parsed(void *val, size_t len, void *data) {
 
         assert(strtok(NULL, ":") == NULL);
 
-        sqlite_result = sqlite3_bind_int(parsing_state->insert_stmt,
-                                         field_number + 1,
-                                         atoi(hours) * 3600 +
-                                         atoi(minutes) * 60 +
-                                         atoi(seconds));
+        field_value->time_value =
+          atoi(hours) * 3600 +
+          atoi(minutes) * 60 +
+          atoi(seconds);
       }
       break;
+
+    default:
+      /* Unrecognized field type; this should never be reached */
+      assert(false);
     }
 
-    if(sqlite_result != SQLITE_OK) {
-      fprintf(stderr,
-              "field_parsed: "
-              "Error binding value \"%.*s\" to %s: %s\n",
-              len,
-              val,
-              field_spec->name,
-              sqlite3_errmsg(parsing_state->db));
-    }
+    /* Add this field value to our hash table of parsed fields */
+    g_hash_table_insert(parsing_state->fields,
+                        (gpointer)field_spec->name,
+                        field_value);
   }
   else {
     /* We're still parsing the header; use this header field to update
        our column-number-to-field-number mapping */
 
+    unsigned int field_number = 0;
+    bool field_name_matched = false;
+
     assert(parsing_state->fields_parsed < MAX_COLUMNS);
 
     /* Search for this field's number by name */
-    field_number = 0;
-    field_name_matched = false;
     while(!field_name_matched &&
           field_number < gtfs_file_spec->num_fields) {
       field_name_matched =
@@ -319,6 +289,122 @@ static void record_parsed(int eor, void *data) {
         assert(sqlite3_reset(begin_transaction_stmt) == SQLITE_OK);
     }
 
+    /* Bind each field value to our INSERT statement */
+    for(unsigned int field_number = 0;
+        field_number < parsing_state->gtfs_file_spec->num_fields;
+        field_number += 1) {
+      gtfs_field_spec_t *field_spec;
+      gtfs_field_value_t *field_value;
+      int sqlite_result;
+
+      field_spec =
+        parsing_state->gtfs_file_spec->field_specs[field_number];
+
+      /* Get the parsed field value, if present */
+      field_value =
+        g_hash_table_lookup(parsing_state->fields,
+                            (gconstpointer)field_spec->name);
+
+      if(field_value == NULL) {
+        if(!field_spec->required) {
+          /* Optional but missing values are bound as NULL */
+          sqlite_result = sqlite3_bind_null(parsing_state->insert_stmt,
+                                            field_number + 1);
+        }
+        else {
+          /* Required but missing values are an error */
+          fprintf(stderr,
+                  "record_parsed: "
+                  "Field \"%s\" is required but missing\n",
+                  field_spec->name);
+        }
+      }
+      else {
+        /* Bind this value to our INSERT statement */
+        switch(field_spec->type) {
+          static const char *true_char = "t";
+          static const char *false_char = "f";
+
+          unsigned int len, max_len;
+          char iso8601_date_str[24];
+
+        case TYPE_BOOLEAN:
+          /* Map boolean values to "t" and "f" to match Active
+             Record's behaviour */
+          sqlite_result =
+            sqlite3_bind_text(parsing_state->insert_stmt,
+                              field_number + 1,
+                              field_value->boolean_value ?
+                              true_char : false_char,
+                              1,
+                              SQLITE_TRANSIENT);
+          break;
+
+        case TYPE_INTEGER:
+          sqlite_result =
+            sqlite3_bind_int(parsing_state->insert_stmt,
+                             field_number + 1,
+                             field_value->integer_value);
+          break;
+
+        case TYPE_DOUBLE:
+          sqlite_result =
+            sqlite3_bind_double(parsing_state->insert_stmt,
+                                field_number + 1,
+                                field_value->double_value);
+          break;
+
+        case TYPE_STRING:
+          len = strlen(field_value->string_value);
+          max_len = len > field_spec->length? field_spec->length: len;
+
+          sqlite_result =
+            sqlite3_bind_text(parsing_state->insert_stmt,
+                              field_number + 1,
+                              field_value->string_value,
+                              max_len,
+                              SQLITE_TRANSIENT);
+
+          /* Free the memory allocated for the string immediately */
+          free(field_value->string_value);
+          field_value->string_value = NULL;
+          break;
+
+        case TYPE_DATE:
+          assert(len = strftime(iso8601_date_str,
+                                sizeof(iso8601_date_str),
+                                "%F",
+                                &field_value->date_value));
+          sqlite_result =
+            sqlite3_bind_text(parsing_state->insert_stmt,
+                              field_number + 1,
+                              iso8601_date_str,
+                              len,
+                              SQLITE_TRANSIENT);
+          break;
+
+        case TYPE_TIME:
+          sqlite_result =
+            sqlite3_bind_int(parsing_state->insert_stmt,
+                             field_number + 1,
+                             field_value->time_value);
+          break;
+
+        default:
+          /* Unrecognized field type; this should never be reached */
+          assert(false);
+        }
+
+        if(sqlite_result != SQLITE_OK) {
+          fprintf(stderr,
+                  "record_parsed: "
+                  "Error binding value for field \"%s\": %s\n",
+                  field_spec->name,
+                  sqlite3_errmsg(parsing_state->db));
+        }
+      }
+    }
+
     /* Insert the parsed record into the database */
     if(sqlite3_step(parsing_state->insert_stmt) == SQLITE_DONE) {
       /* Another object loaded to the database */
@@ -349,8 +435,12 @@ static void record_parsed(int eor, void *data) {
     parsing_state->header_parsed = true;
   }
 
-  /* Reset our fields-parsed (per record) counter */
+  /* Reset our parsing state */
   parsing_state->fields_parsed = 0;
+  g_hash_table_remove_all(parsing_state->fields);
+  memset(parsing_state->field_values,
+         0,
+         sizeof(parsing_state->field_values));
 }
 
 /* Loads a GTFS file (that is, a file contained within a GTFS bundle)
@@ -384,6 +474,8 @@ long load_gtfs_file(const gtfs_file_spec_t *gtfs_file_spec,
         memset(&parsing_state, 0, sizeof(parsing_state));
         parsing_state.db = db;
         parsing_state.gtfs_file_spec = gtfs_file_spec;
+        parsing_state.fields = g_hash_table_new(g_str_hash,
+                                                g_str_equal);
         parsing_state.insert_stmt = insert_stmt;
 
         /* Start a new transaction in the database */
@@ -436,6 +528,11 @@ long load_gtfs_file(const gtfs_file_spec_t *gtfs_file_spec,
                   "Error finalizing INSERT statement: %s\n",
                   sqlite3_errmsg(db));
         }
+
+        /* Uninitialize our parsing state */
+        parsing_state.insert_stmt = NULL;
+        g_hash_table_destroy(parsing_state.fields);
+        parsing_state.fields = NULL;
 
         /* Define indices on the table, if any CREATE INDEX commands
            have been given */

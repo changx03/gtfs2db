@@ -29,6 +29,16 @@ typedef enum {
   TYPE_TIME     /* in "H:MM:SS" or "HH:MM:SS" format */
 } gtfs_field_type_t;
 
+/* Represents the value of a field parsed from a GTFS file */
+typedef union {
+  bool boolean_value;
+  int integer_value;
+  double double_value;
+  char *string_value;
+  struct tm date_value;
+  int time_value;
+} gtfs_field_value_t;
+
 /* Defines a field present in a GTFS file and stored in the
    database */
 typedef struct {
