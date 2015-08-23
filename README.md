@@ -45,3 +45,14 @@ this:
 The generated database can then be opened at the command line with
 
     sqlite3 ./google_transit.sqlite
+
+License
+-------
+
+gtfs2db may be modified and redistributed under the terms of the GNU General
+Public License, version 3 or later.
+
+Author
+------
+
+Simon South (ssouth@simonsouth.com).
